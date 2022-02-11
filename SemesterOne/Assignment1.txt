@@ -1,0 +1,55 @@
+%Given Rules and Facts
+%numeral(0).
+%numeral(s(X)) :- numeral(X).
+%numeral(X+Y) :- numeral(X),numeral(Y). %Exercise 1
+%numeral(p(X)) :- numeral(X).%Exercise 2
+%numeral(-X) :- numeral(X). %Exercise 4
+%numeral(X-Y):-numeral(X),numeral(Y). %Exercise 6
+
+%add(0,X,X).
+%add(s(X),Y,s(Z)) :- add(X,Y,Z).
+%add(p(X),Y,p(Z)) :- add(X,Y,Z).
+
+%Exercise 1
+simplify(0,0).
+simplify(s(X),s(Y)) :- simplify(X,Y).
+simplify(X+Y,Z) :- add2(X,Y,Z).
+%Exercise 2
+simplify(p(X),p(Y)) :- simplify(X,Y).
+simplify(p(s(X)),Y) :- simplify(X,Y).
+simplify(s(p(X)),Y) :- simplify(X,Y).
+
+simplify(X-Y,Z) :- subtract(X,Y,Z).
+
+%Exercise 1
+add2(0,Y,Z):-simplify(Y,Z).
+add2(s(X),Y,s(Z)) :- add2(X,Y,Z).
+add2(X+Y,B,Z) :- add2(X,Y,R), add2(R,B,Z).
+
+%Exercise 2
+add2(p(X),s(Y),Z) :- add2(X,Y,Z).
+add2(s(X),p(Y),Z) :- add2(X,Y,Z).
+add2(p(s(X)),Y,Z) :- add2(X,Y,Z).
+add2(s(p(X)),Y,Z) :- add2(X,Y,Z).
+add2(p(X),Y,p(Z)) :- add2(X,Y,Z).
+
+%Exercise 4
+add2(-X,Y,Z) ss:- minus(X,R),add2(R,Y,Z).
+add2(X,-Y,Z) :- minus(Y,S),add2(X,S,Z).
+
+%Exercise 6
+add2(X-Y,B,Z) :- subtract(X,Y,R),add2(R,B,Z).
+
+%Exercise 3
+minus(0,0).
+minus(s(p(X)),Y) :- minus(X,Y).
+minus(s(X),p(Y)) :- minus(X,Y).
+minus(p(s(X)),Y) :- minus(X,Y).
+minus(p(X),s(Y)) :- minus(X,Y).
+minus(X+Y,Z) :- add2(X,Y,R),minus(R,Z).
+minus(X-Y,Z) :- subtract(X,Y,R),minus(R,Z).
+
+%Exercise 5
+subtract(X,Y,Z) :- minus(Y,S),add2(X,S,Z).
+subtract(-X,Y,Z) :- add2(X,Y,Z).
+subtract(X,-Y,Z) :- add2(X,Y,Z).

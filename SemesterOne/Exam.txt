@@ -1,0 +1,67 @@
+%Q1(a)(i)
+Yes X is a list and is a list of size 2, containing 0 at the head and another list as it's second member, that very list being [0,X]. Therefore the list that is stored in X is the list
+[0,[0,X]].
+
+%Q1(a)(ii)
+Yes Y is also a list but a list that extends to infinity as it was declared using 0 as the initial head element and Y as the entire tail element and not just a second element. As the tail of a list is in itself a list, this list extends onto infinity. If one was to print the list stored in Y it would look like
+[0|[0|[0|[0|[0|.......]
+For infinity.
+
+%Q1(b)
+membe(_,[],0).
+membe(X,[H|T],N) :-
+    X == H,
+    membe(X,T,K),
+    N is K + 1, !;
+    membe(X,T,N).
+
+%Q1(c)(i)
+True as sublis2/2 is finding the sublist in the opposite way to the sublist/2 by looking for the suffix of some prefix and hence will give the same solution for queries posed to sublist/2.
+
+%Q1(c)(ii)
+False as sublis3/2 is declared in a similar way as sublist/2 is by searching for some prefix of a suffix of a list. However, by declaring the prefix before defining the suffix the prefix belongs to, it may cause infinite loops to occur whilst searching for sublists close to nil in size.
+
+%Q1(c)(iii)
+sub([],[]).
+sub(L,[_|T]) :-
+    sub(L,T).
+sub([H|T],[H|T1]) :-
+    append(T,_,T1).
+
+%Q1(d)
+False,
+When q(X) goes through the findall, all of the limited solutions for example 5, will be stored in L, for example L = [0,1,2,3,4]. 
+If we know that there are 5 solutions to and we enter 5 as N in our length/2 predicate, we will get a result of no(/false). This is due to the fact that there are in fact 6 elements to this List L. Those being [0,1,2,3,4,[]]. 
+This is due to the empty list [], being the tail element when the only element left in the list is 4 ([4|[]]). As a result, the number of solutions to q(X) will not be the correct value for N in the length/2 predicate.  
+
+
+%Q2(a)(i)
+int(0).
+int(X) :- int(X1),X is X1+1. 
+
+%Q2(a)(ii)
+
+intgr(0).
+intgr(X) :- intgr(X1), (X is X1+1 ; X is -X1-1).
+
+%2(b)(i)
+good([0]).
+good([1,0]).
+good([A,B|T]) :- good([B|T]), (B>0, A is -B ; B < 0, A is -B+1).
+
+%Q2(b)(ii)
+s --> [0].
+s --> [1,0].
+s --> {N is 1},lang(N),[0,1].
+s --> {N is -1},lang(N),[0,1].
+lang(N) --> 
+    {N > 0},
+    pos(N,B),
+    [B];
+    {N < 0},
+    neg(N,B),
+    [B].
+pos(N,B) --> 
+    {B is -N}.
+neg(N,B) -->
+    {B is -N+1}.
