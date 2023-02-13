@@ -211,8 +211,7 @@ class QLearningTable:
             action = np.random.choice(state_action[state_action == np.max(state_action)].index)
 
         else:
-            state_action = self.q_table.loc[observation, :]
-            action = np.random.choice(state_action[state_action == np.min(state_action)].index)
+             action = np.random.choice(self.actions)
            
         return action
 #====================================================================================================
