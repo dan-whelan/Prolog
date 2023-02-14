@@ -1,37 +1,35 @@
-nTm(MR, ML, WL, HL, Input, Output) :-
-	step([[], Input, q0], MR, ML, WL, HL, NewL, NewR),
-	reverse(NewL, NewL1),
-	append(NewL1, NewR, Out0),
-	removeBlanks(Out0, Out1),
-	reverse(Out1, ReversedOut0),
-	removeBlanks(ReversedOut0, ReversedOut1),
-	reverse(ReversedOut1, Output).
+nTm(MoveRight, MoveLeft, WriteList, HaltList, Input, Output) :-
+    step([[], Input, q0], MoveRight, MoveLeft, WriteList, HaltList, LeftOutput, RightOutput),
+    reverse(LeftOutput, ReversedLeft),
+    append(ReversedLeft, RightOutput, OutputWithBlanks),
+    clearLeadingBlanks(OutputWithBlanks, OutputWithBlanksAtEnd),
+    reverse(OutputWithBlanksAtEnd, OutputWithBlanksAtStart),
+    clearLeadingBlanks(OutputWithBlanksAtStart, ReversedOutput),
+    reverse(ReversedOutput, Output).
 
-step([L, [Symbol|R], State], MR, ML, WL, HL, L, [Symbol|R]) :- member([State, Symbol], HL).
-step([L, [Symbol|R], State], MR, ML, WL, HL, NewL, NewR) :-
-	findRule(State, Symbol, NewState, NewSymbol, MR, ML, WL, Move),
-	move(Move, L, Ls1, [Symbol|R], Rs1, NewSymbol),
-	step([Ls1, Rs1, NewState], MR, ML, WL, HL, NewL, NewR).
 
-move(left, L, NewL, R, NewR, _) :- left(L, NewL, R, NewR).
-move(write, L, L, [OldSymbol|R], [NewSymbol|R], NewSymbol).
-move(right, L, NewL, R, NewR, _) :- right(L, NewL, R, NewR).
+step([Left, [Symbol|Right], State], MoveRight, MoveLeft, WriteList, HaltList, Left, [Symbol|Right]) :- member([State, Symbol], HaltList).
+step([Left, [Symbol|Right], State], MoveRight, MoveLeft, WriteList, HaltList, LeftOutput, RightOutput) :-
+    rule(State, Symbol, NewState, NewSymbol, MoveRight, MoveLeft, WriteList, Rule),
+    move(Rule, Left, NewLeft, [Symbol|Right], NewRight, NewSymbol),
+    step([NewLeft, NewRight, NewState], MoveRight, MoveLeft, WriteList, HaltList, LeftOutput, RightOutput).
 
-left([], [], R, [b-k|R]).
-left([L|Ls], Ls, NewR, [L|NewR]).
+rule(State, Symbol, NewState, _, _, MoveLeft, _, left) :-
+    member([State, Symbol, NewState], MoveLeft).
+rule(State, Symbol, NewState, NewSymbol, _, _, WriteList, write) :-
+    member([State, Symbol, NewSymbol, NewState], WriteList).
+rule(State, Symbol, NewState, _, MoveRight, _, _, right) :-
+    member([State, Symbol, NewState], MoveRight).
 
-right(L, [Symbol|L], [Symbol], [b-k]).
-right(L, [Symbol|L], [Symbol|NewR], NewR).
+move(left, Left, NewLeft, Right, NewRight, _) :- leftMove(Left, NewLeft, Right, NewRight).
+move(write, Left, Left, [OldSymbol|Right], [NewSymbol|Right], NewSymbol).
+move(right, Left, NewLeft, Right, NewRight, _) :- rightMove(Left, NewLeft, Right, NewRight).
 
-findRule(State, Symbol, NewState, NewSymbol, MR, ML, WL, Move) :-
-	ruleR([State, Symbol, NewState], MR, Move);
-	ruleL([State, Symbol, NewState], ML, Move);
-	ruleW([State, Symbol, NewSymbol, NewState], WL, Move).
+leftMove([], [], Right, [b-k|Right]).
+leftMove([Left|NewLeft], NewLeft, NewRight, [Left|NewRight]).
 
-ruleR(Current, MR, right) :- member(Current, MR).
-ruleL(Current, ML, left) :- member(Current, ML).
-ruleW(Current, WL, write) :- member(Current, WL).
+rightMove(Left, [Symbol|Left], [Symbol], b-k).
+rightMove(Left, [Symbol|Left], [Symbol|NewRight], NewRight).
 
-removeBlanks([b-k|Rest],Final) :-
-	removeBlanks(Rest, Final), !.
-removeBlanks(List, List).
+clearLeadingBlanks([b-k|Tail], Out) :- clearLeadingBlanks(Tail, Out), !.
+clearLeadingBlanks(Out, Out).
