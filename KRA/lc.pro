@@ -1,0 +1,66 @@
+/**
+*   clause_satisfied/2
+*       determines whether the clause selected from the KB is true based on an if-else statement
+*       - If the head of the rule is true, the clause is true 
+*       - Else if the body of the rule is true, this implies the head is true, the clause is true
+*       - Else the clause is not true
+*   params
+*       - H :- The head of the clause
+*       - Body :- The body of the clause
+*       - C :- The list of Logical Consequences of the current KB 
+*/
+clause_satisfied([H|Body], C) :- 
+    \+ member(H, C), 
+    subset(Body, C).
+
+/**
+*   select_clause/4 
+*       selects a clause from the current KB and sends this clause to clause_satisfied/2
+*       - If this clause is satisfied, it returns the head of that clause.
+*   params
+*       - KB :- The knowledge base being used currently
+*       - C :- The list of logical consequences of this KB
+*       - H :- The return value of the predicate. Is the head of a clause that is true.
+*       - RestKB :- The remainder of the KB that has not been selected by this predicate
+*/
+select_clause(KB, C, H, RestKB) :-
+    select(Clause, KB, RestKB),
+    clause_satisfied(Clause, C),
+    [H|_] = Clause.
+
+/**
+*   lc/3
+*       Calls select_clause/4 to determine if there are any true clauses in the KB (or that remaining of)
+*       - If a true clause is found, the head of this clause (H returned from select_clause/4 is appended 
+*         to the list of logical consequences and the predicate is called again with new information).
+*       - Else, the predicate returns the current list of logical consequences
+*   params
+*       KB :- The current KB in use
+*       C :- The most up to date list of logical consequences
+*       NewC :- The return list of logical consequences
+*/
+lc(KB, C, NewC) :-
+    (select_clause(KB, C, H, RestKB) ->
+        (append([H], C, UpdatedC),
+        lc(RestKB, UpdatedC, NewC));
+    NewC = C).
+
+/**
+*   lc/2
+*       A predicate that when called and provided a KB returns a list of logical consequences to that KB
+*   params
+*       KB :- The KB from which to determine all logical consequences
+*       C :- The returned list of all logical consequences
+*/
+lc(KB, C) :- lc(KB, [], C).
+
+/**
+*   query/2
+*       predicate provided in question that is used to determine whether X is a logical consequence of KB
+*       - Cut included at the end as each logical consequence only included once in C and this prevents 
+*         further searching of the list if term is found.
+*   params
+*       X :- The term which is to be determined as a logical consequence of KB
+*       KB :- The KB that may/may not have X as a logical consequence
+*/
+query(X, KB) :- lc(KB, C), member(X, C), !.
